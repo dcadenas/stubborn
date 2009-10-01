@@ -1,6 +1,54 @@
-= stub_helper
+= stubborn
 
-Description goes here.
+A Ruby gem that helps you find missing stubs in your tests.
+
+Say you have this classes:
+
+  class Api
+    def slow_method(a, b, c)
+      ...
+    end
+  end
+
+  class MyClassThatUsesApi
+    def useful_method
+      ...
+      important_value = api.slow_method(important_parameter, something_else, another)
+      ...
+    end
+  end
+   
+And you have this somewhere in your test_helper/spec_helper:
+
+  require 'rubygems'
+  require 'stubborn'
+
+  Stubborn.should_be_stubbed(Api)
+
+Then if you forget about stubbing the api class in some of your tests like this:
+
+  it "should do something useful" do
+    MyClassThatUsesApi.new.useful_method.should be_useful
+  end
+  
+You will know that you missed it because the test will fail with an exception including all information you need to construct the correct stub:
+
+  You've missed adding a stub. Consider this suggestions:
+  api_instance.stub!(:slow_method).with(123, AClass, "hi").and_return(another_class_instance)
+  api_instance.stub!(:slow_method).and_return(another_class_instance)
+
+== Installation
+
+  sudo gem install stubborn
+
+== To Do
+
+* Filters so that you can choose which methods to include or exclude
+* Stub suggestions for more test frameworks. It currently show only rspec syntax
+
+== Collaborate
+
+http://github.com/dcadenas/stubborn
 
 == Copyright
 
