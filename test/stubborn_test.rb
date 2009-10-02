@@ -28,6 +28,24 @@ Expectations do
     api.class.name
   end
 
+  %w[is_a? kind_of?].each do |method|
+    expect true do
+      reset_test_api_class
+      api = TestApi.new
+      api = Stubborn.should_be_stubbed(api)
+      api.__send__(method, TestApi)
+    end
+  end
+
+  %w[equal? eql? == ===].each do |method|
+    expect true do
+      reset_test_api_class
+      api = TestApi.new
+      proxied_api = Stubborn.should_be_stubbed(api)
+      proxied_api.__send__(method, api)
+    end
+  end
+
   expect true do
     reset_test_api_class
     api = TestApi.new

@@ -25,8 +25,8 @@ module Stubborn
       options = {:class => proxy_target.class}.merge(options)
       @label = options[:label]
       @proxy_target = proxy_target
-      @klass = klass
-      @methods_to_skip = ["respond_to?", "is_a?"]
+      @klass = options[:class]
+      @methods_to_skip = ["respond_to?", "is_a?", "kind_of?", "equal?", "eql?", "==", "==="]
     end
 
     def class
