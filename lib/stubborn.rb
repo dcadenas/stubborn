@@ -12,7 +12,7 @@ module Stubborn
 
   class ProxyForInstance
     instance_methods.each do |sym|
-      undef_method(sym) unless sym.to_s =~ /__/
+      undef_method(sym) unless sym.to_s =~ /__/ || sym.to_s == "send"
     end
 
     def initialize(proxy_target, options = {})

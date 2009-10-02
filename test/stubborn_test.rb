@@ -33,7 +33,7 @@ Expectations do
       reset_test_api_class
       api = TestApi.new
       api = Stubborn.should_be_stubbed(api)
-      api.__send__(method, TestApi)
+      api.send(method, TestApi)
     end
   end
 
@@ -42,7 +42,7 @@ Expectations do
       reset_test_api_class
       api = TestApi.new
       proxied_api = Stubborn.should_be_stubbed(api)
-      proxied_api.__send__(method, api)
+      proxied_api.send(method, api)
     end
   end
 
