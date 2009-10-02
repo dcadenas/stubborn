@@ -1,7 +1,7 @@
 module Stubborn
   class MissedStubException < RuntimeError
-    def initialize(object, method_name, args, result, suggester)
-      object_label = friendly_name(object)
+    def initialize(object_or_label, method_name, args, result, suggester)
+      object_label = object_or_label.respond_to?(:to_str) ? object_or_label : friendly_name(object_or_label)
       args = args.map{|a| friendly_name(a)}.join(", ")
       result = friendly_name(result)
 

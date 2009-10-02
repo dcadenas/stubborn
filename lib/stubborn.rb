@@ -9,11 +9,11 @@ require 'suggesters/rspec_suggester'
 require 'missed_stub_exception'
 
 module Stubborn
-  def self.should_be_stubbed(object)
+  def self.should_be_stubbed(object, options = {})
     if object.is_a?(Class)
-      ProxyForClass.new(object)
+      ProxyForClass.new(object, options)
     else
-      ProxyForInstance.new(object)
+      ProxyForInstance.new(object, options)
     end
   end
 
@@ -21,7 +21,9 @@ module Stubborn
     attr_accessor :proxy_target
     proxy_to :proxy_target, :blank_slate => true
 
-    def initialize(proxy_target, klass = proxy_target.class)
+    def initialize(proxy_target, options = {})
+      options = {:class => proxy_target.class}.merge(options)
+      @label = options[:label]
       @proxy_target = proxy_target
       @klass = klass
       @methods_to_skip = ["respond_to?", "is_a?"]
@@ -34,12 +36,12 @@ module Stubborn
     def method_missing(method_name, *args, &block)
       result = @proxy_target.send(method_name, *args, &block)
       return result if @methods_to_skip.include?(method_name.to_s)
-      raise MissedStubException.new(@proxy_target, method_name, args, result, Suggesters::RSpecSuggester)
+      raise MissedStubException.new(@label || @proxy_target, method_name, args, result, Suggesters::RSpecSuggester)
     end
   end
 
   class ProxyForClass < ProxyForInstance
-    def initialize(proxy_target)
+    def initialize(proxy_target, options = {})
       super
       redefine_const(proxy_target.name, self) unless proxy_target.name.strip.empty?
     end
@@ -50,7 +52,7 @@ module Stubborn
 
     def new(*args, &block)
       new_instance = @proxy_target.new(*args, &block)
-      ProxyForInstance.new(new_instance, self)
+      ProxyForInstance.new(new_instance, :class => self)
     end
 
   private
