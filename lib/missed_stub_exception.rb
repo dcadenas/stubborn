@@ -20,7 +20,7 @@ module Stubborn
       if object.is_a?(Class)
         object.name
       else
-        "#{object.class.name.downcase}_instance"
+        "#{object.class.name.downcase.gsub(/\W+/, '_')}_instance"
       end
     end
   end

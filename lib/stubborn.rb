@@ -37,7 +37,7 @@ module Stubborn
   class ProxyForClass < ProxyForInstance
     def initialize(proxy_target, options = {})
       super
-      redefine_const(proxy_target.name, self) unless proxy_target.name.strip.empty?
+      redefine_const(proxy_target, self) unless proxy_target.name.strip.empty?
     end
 
     def name
@@ -50,9 +50,13 @@ module Stubborn
     end
 
   private
-    def redefine_const(name, value)
-      Object.__send__(:remove_const, name) if Object.const_defined?(name)
-      Object.const_set(name, value)
+    def redefine_const(const, value)
+      const_parts = const.name.split('::')
+      const_name = const_parts.pop
+      parent_const = const_parts.inject(Object){|a, c| a.const_get(c) }
+
+      parent_const.__send__(:remove_const, const_name) if parent_const.const_defined?(const_name)
+      parent_const.const_set(const_name, value)
     end
   end
 end

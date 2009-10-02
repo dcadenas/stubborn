@@ -1,8 +1,10 @@
 require 'test_helper'
 
+module Test; end
+
 def reset_test_api_class
-  name = "TestApi"
-  Object.__send__(:remove_const, name) if Object.const_defined?(name)
+  name = "Api"
+  Test.__send__(:remove_const, name) if Test.const_defined?(name)
   klass =  Class.new do
     def plus_one(number)
       number + 1
@@ -12,18 +14,18 @@ def reset_test_api_class
       number + 2
     end
   end
-  Object.const_set(name, klass)
+  Test.const_set(name, klass)
 end
 
 Expectations do
   expect 2 do
     reset_test_api_class
-    TestApi.new.plus_one(1)
+    Test::Api.new.plus_one(1)
   end
 
-  expect "TestApi" do
+  expect "Test::Api" do
     reset_test_api_class
-    api = TestApi.new
+    api = Test::Api.new
     api = Stubborn.should_be_stubbed(api)
     api.class.name
   end
@@ -31,16 +33,16 @@ Expectations do
   %w[is_a? kind_of?].each do |method|
     expect true do
       reset_test_api_class
-      api = TestApi.new
+      api = Test::Api.new
       api = Stubborn.should_be_stubbed(api)
-      api.send(method, TestApi)
+      api.send(method, Test::Api)
     end
   end
 
   %w[equal? eql? == ===].each do |method|
     expect true do
       reset_test_api_class
-      api = TestApi.new
+      api = Test::Api.new
       proxied_api = Stubborn.should_be_stubbed(api)
       proxied_api.send(method, api)
     end
@@ -48,28 +50,28 @@ Expectations do
 
   expect true do
     reset_test_api_class
-    api = TestApi.new
+    api = Test::Api.new
     api = Stubborn.should_be_stubbed(api)
     api.respond_to?(:plus_one)
   end
 
   expect Stubborn::MissedStubException do
     reset_test_api_class
-    api = TestApi.new
+    api = Test::Api.new
     api = Stubborn.should_be_stubbed(api)
     api.plus_one(1) 
   end
 
   expect 3 do
     reset_test_api_class
-    api = TestApi.new
+    api = Test::Api.new
     api = Stubborn.should_be_stubbed(api)
     api.class.plus_two(1) 
   end
 
-  expect "You've missed adding a stub. Consider this suggestions:\ntestapi_instance.stub!(:plus_one).with(0).and_return(1)\ntestapi_instance.stub!(:plus_one).and_return(1)" do
+  expect "You've missed adding a stub. Consider this suggestions:\ntest_api_instance.stub!(:plus_one).with(0).and_return(1)\ntest_api_instance.stub!(:plus_one).and_return(1)" do
     reset_test_api_class
-    api = TestApi.new
+    api = Test::Api.new
     api = Stubborn.should_be_stubbed(api)
     message = ""
     begin
@@ -81,7 +83,7 @@ Expectations do
 
   expect "You've missed adding a stub. Consider this suggestions:\nApi.singleton.stub!(:plus_one).with(0).and_return(1)\nApi.singleton.stub!(:plus_one).and_return(1)" do
     reset_test_api_class
-    api = TestApi.new
+    api = Test::Api.new
     api = Stubborn.should_be_stubbed(api, :label => "Api.singleton")
     message = ""
     begin
@@ -91,39 +93,39 @@ Expectations do
     end
   end
 
-  expect "TestApi" do
+  expect "Test::Api" do
     reset_test_api_class
-    Stubborn.should_be_stubbed(TestApi)
-    api = TestApi.new
+    Stubborn.should_be_stubbed(Test::Api)
+    api = Test::Api.new
     api.class.name
   end
 
   expect true do
     reset_test_api_class
-    Stubborn.should_be_stubbed(TestApi)
-    api = TestApi.new
+    Stubborn.should_be_stubbed(Test::Api)
+    api = Test::Api.new
     api.respond_to?(:plus_one)
   end
 
   expect Stubborn::MissedStubException do
     reset_test_api_class
-    Stubborn.should_be_stubbed(TestApi)
-    api = TestApi.new
+    Stubborn.should_be_stubbed(Test::Api)
+    api = Test::Api.new
     api.plus_one(1) 
   end
 
   expect Stubborn::MissedStubException do
     reset_test_api_class
-    Stubborn.should_be_stubbed(TestApi)
-    api = TestApi.new
+    Stubborn.should_be_stubbed(Test::Api)
+    api = Test::Api.new
     api.class.plus_two(1) 
   end
 
-  expect "You've missed adding a stub. Consider this suggestions:\ntestapi_instance.stub!(:plus_one).with(0).and_return(1)\ntestapi_instance.stub!(:plus_one).and_return(1)" do
+  expect "You've missed adding a stub. Consider this suggestions:\ntest_api_instance.stub!(:plus_one).with(0).and_return(1)\ntest_api_instance.stub!(:plus_one).and_return(1)" do
     reset_test_api_class
-    Stubborn.should_be_stubbed(TestApi)
+    Stubborn.should_be_stubbed(Test::Api)
     message = ""
-    api = TestApi.new
+    api = Test::Api.new
     begin
       api.plus_one(0)
     rescue => e 
