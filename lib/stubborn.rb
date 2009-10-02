@@ -1,10 +1,3 @@
-begin
-  require 'proxen' 
-rescue LoadError
-  puts "You need to install the proxen gem: sudo gem install nakajima-proxen -s http://gems.github.com"
-  exit
-end
-
 require 'suggesters/rspec_suggester'
 require 'missed_stub_exception'
 
@@ -18,8 +11,9 @@ module Stubborn
   end
 
   class ProxyForInstance
-    attr_accessor :proxy_target
-    proxy_to :proxy_target, :blank_slate => true
+    instance_methods.each do |sym|
+      undef_method(sym) unless sym.to_s =~ /__/
+    end
 
     def initialize(proxy_target, options = {})
       options = {:class => proxy_target.class}.merge(options)
