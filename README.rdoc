@@ -2,10 +2,14 @@
 
 A Ruby gem that helps you find missing stubs in your tests.
 
-Say you have this classes:
+== Usage
+
+Let's explain through an example. Say you have this classes:
 
   class Api
     def slow_method(a, b, c)
+      ...
+      #this is slow or dangerous, so you want to stub it in your tests
       ...
     end
   end
@@ -18,33 +22,47 @@ Say you have this classes:
     end
   end
    
-And you have this somewhere in your test_helper/spec_helper:
+And you've forgot to stub your api class in many tests of your huge test suite:
+
+  it "should do something useful" do
+    MyClassThatUsesApi.new.useful_method.should be_useful
+  end
+
+Then you could use stubborn to help you find and prevent those misses just by adding this somewhere in your test_helper/spec_helper:
 
   require 'rubygems'
   require 'stubborn'
 
   Stubborn.should_be_stubbed(Api)
-
-Then if you forget about stubbing the api class in some of your tests like this:
-
-  it "should do something useful" do
-    MyClassThatUsesApi.new.useful_method.should be_useful
-  end
   
-You will know that you missed it because the test will fail with an exception including all information you need to construct the correct stub:
+Now each test with a missing stub will fail throwing an exception that includes all information you need to construct the correct stub:
 
   You've missed adding a stub. Consider this suggestions:
   api_instance.stub!(:slow_method).with(123, AClass, "hi").and_return(another_class_instance)
   api_instance.stub!(:slow_method).and_return(another_class_instance)
 
+You have some control on the output by using the :label option so you can better match the way you usually call the methods from your test:
+
+  Stubborn.should_be_stubbed(Api, :label => "GreatClass.singleton")
+
+Which produces this output:
+
+  You've missed adding a stub. Consider this suggestions:
+  GreatClass.singleton.stub!(:slow_method).with(123, AClass, "hi").and_return(another_class_instance)
+  GreatClass.singleton.stub!(:slow_method).and_return(another_class_instance)
+
+So all class methods of the Api class and all its instances will raise this special exception while running the tests. If you prefer you can use it on a single instance like this:
+
+  Stubborn.should_be_stubbed(Api.new)
+
 == Installation
 
-  sudo gem install stubborn
+  sudo gem install stubborn -s http://gemcutter.org
 
 == To Do
 
 * Filters so that you can choose which methods to include or exclude
-* Stub suggestions for more test frameworks. It currently show only rspec syntax
+* Give stub suggestions for more test frameworks. It currently shows only rspec syntax
 
 == Collaborate
 
