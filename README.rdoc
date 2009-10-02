@@ -9,7 +9,7 @@ Let's explain through an example. Say you have this classes:
   class Api
     def slow_method(a, b, c)
       ...
-      #this is slow or dangerous, so you want to stub it in your tests
+      #this is slow, dangerous, or it's just an external dependency that should be stubbed
       ...
     end
   end
