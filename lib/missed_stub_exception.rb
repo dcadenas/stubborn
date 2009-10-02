@@ -15,7 +15,7 @@ module Stubborn
   private
     def friendly_name(object)
       return "\"#{object}\"" if object.respond_to?(:to_str)
-      return object.inspect if object.respond_to?(:to_int)
+      return object.inspect if object.respond_to?(:to_int) || object.is_a?(Hash)
 
       if object.is_a?(Class)
         object.name

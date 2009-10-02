@@ -6,8 +6,8 @@ class Api; end
 include Stubborn
 
 Expectations do
-  expect "You've missed adding a stub. Consider this suggestions:\napi_instance.stub!(:method).with(123, AClass, \"hi\").and_return(aclass_instance)\napi_instance.stub!(:method).and_return(aclass_instance)" do
-    MissedStubException.new(Api.new, :method, [123, AClass,"hi"], AClass.new, Suggesters::RSpecSuggester).message
+  expect "You've missed adding a stub. Consider this suggestions:\napi_instance.stub!(:method).with(123, AClass, \"hi\", {1=>2}).and_return(aclass_instance)\napi_instance.stub!(:method).and_return(aclass_instance)" do
+    MissedStubException.new(Api.new, :method, [123, AClass,"hi", {1 => 2}], AClass.new, Suggesters::RSpecSuggester).message
   end
 
   expect "You've missed adding a stub. Consider this suggestion:\napi_instance.stub!(:method).and_return(aclass_instance)" do
