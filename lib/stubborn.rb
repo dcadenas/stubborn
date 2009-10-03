@@ -28,9 +28,29 @@ module Stubborn
     end
 
     def method_missing(method_name, *args, &block)
-      result = @proxy_target.send(method_name, *args, &block)
-      return result if @methods_to_skip.include?(method_name.to_s)
-      raise MissedStubException.new(@label || @proxy_target, method_name, args, result, Suggesters::RSpecSuggester)
+      comes_from_another = comes_from_another_method_missing?
+      begin
+        set_comes_from_another
+        result = @proxy_target.send(method_name, *args, &block)
+        return result if @methods_to_skip.include?(method_name.to_s) || comes_from_another
+        raise MissedStubException.new(@label || @proxy_target, method_name, args, result, Suggesters::RSpecSuggester)
+      ensure
+        clear_comes_from_another unless comes_from_another
+      end
+    end
+
+    private
+    def comes_from_another_method_missing?
+      Thread.current["stubborn_objects_ids"] = {} if Thread.current["stubborn_objects_ids"].nil?
+      Thread.current["stubborn_objects_ids"][self.__id__]
+    end
+
+    def set_comes_from_another
+      Thread.current["stubborn_objects_ids"][self.__id__] = true
+    end
+
+    def clear_comes_from_another
+      Thread.current["stubborn_objects_ids"].delete(self.__id__)
     end
   end
 

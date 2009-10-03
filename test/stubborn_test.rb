@@ -10,8 +10,19 @@ def reset_test_api_class
       number + 1
     end
 
+    def plus_three(number)
+      number = plus_one(number)
+      number = plus_one(number)
+      plus_one(number)
+    end
+
     def self.plus_two(number)
       number + 2
+    end
+
+    def self.plus_four(number)
+      number = Test::Api.plus_two(number)
+      Test::Api.plus_two(number)
     end
   end
   Test.const_set(name, klass)
@@ -121,6 +132,12 @@ Expectations do
     api.class.plus_two(1) 
   end
 
+  expect Stubborn::MissedStubException do
+    reset_test_api_class
+    Stubborn.should_be_stubbed(Test::Api)
+    Test::Api.plus_two(1) 
+  end
+
   expect "You've missed adding a stub. Consider this suggestions:\ntest_api_instance.stub!(:plus_one).with(0).and_return(1)\ntest_api_instance.stub!(:plus_one).and_return(1)" do
     reset_test_api_class
     Stubborn.should_be_stubbed(Test::Api)
@@ -128,6 +145,29 @@ Expectations do
     api = Test::Api.new
     begin
       api.plus_one(0)
+    rescue => e 
+      message = e.message
+    end
+  end
+
+  expect "You've missed adding a stub. Consider this suggestions:\ntest_api_instance.stub!(:plus_three).with(1).and_return(4)\ntest_api_instance.stub!(:plus_three).and_return(4)" do
+    reset_test_api_class
+    Stubborn.should_be_stubbed(Test::Api)
+    message = ""
+    api = Test::Api.new
+    begin
+      api.plus_three(1)
+    rescue => e 
+      message = e.message
+    end
+  end
+
+  expect "You've missed adding a stub. Consider this suggestions:\nTest::Api.stub!(:plus_four).with(1).and_return(5)\nTest::Api.stub!(:plus_four).and_return(5)" do
+    reset_test_api_class
+    Stubborn.should_be_stubbed(Test::Api)
+    message = ""
+    begin
+      Test::Api.plus_four(1)
     rescue => e 
       message = e.message
     end
