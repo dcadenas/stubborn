@@ -55,11 +55,6 @@ So all unstubbed class methods of the Api class and its instances will raise thi
 
   Stubborn.should_be_stubbed(Api.new)
 
-One interesting constant to control is Net::HTTP :
-
-  require 'net/http'
-  Stubborn.should_be_stubbed(Net::HTTP)
-
 == Installation
 
   sudo gem install stubborn -s http://gemcutter.org
