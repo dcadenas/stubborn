@@ -51,9 +51,17 @@ Which produces this output:
   GreatClass.singleton.stub!(:slow_method).with(123, AClass, "hi").and_return(another_class_instance)
   GreatClass.singleton.stub!(:slow_method).and_return(another_class_instance)
 
-So all unstubbed class methods of the Api class and its instances will raise this special exception while running the tests. If you prefer you can use it on a single instance like this:
+So all unstubbed class methods of the Api class and its instances will raise this special exception while running the tests.
+If you prefer you can use it on a single instance like this:
 
-  Stubborn.should_be_stubbed(Api.new)
+  api = Stubborn.should_be_stubbed(Api.new)
+
+=== Filters
+
+You can control which methods to check with the options :except and :only. Both accept either strings or arrays:
+
+  Stubborn.should_be_stubbed(Api.new, :except => :safe_method)
+  Stubborn.should_be_stubbed(Api.new, :only => [:slow_method, :external_service])
 
 == Installation
 
