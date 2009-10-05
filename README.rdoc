@@ -69,7 +69,6 @@ You can control which methods to check with the options :except and :only. Both 
 
 == To Do
 
-* Filters so that you can choose which methods to include or exclude
 * Give stub suggestions for more test frameworks. It currently shows only rspec syntax
 
 == Collaborate
