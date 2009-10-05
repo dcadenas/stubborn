@@ -16,41 +16,29 @@ module Stubborn
     end
 
     def initialize(proxy_target, options = {})
+      @proxy_target = proxy_target
+
+      options[:except] = [options[:except]].flatten.compact.map{|m| m.to_s}
+      options[:only] = [options[:only]].flatten.compact.map{|m| m.to_s}
       options = {:class => proxy_target.class}.merge(options)
       @label = options[:label]
-      @proxy_target = proxy_target
-      @klass = options[:class]
-      @methods_to_skip = ["respond_to?", "is_a?", "kind_of?", "equal?", "eql?", "==", "==="]
+      @class = options[:class]
+      @methods_to_skip = ["respond_to?", "is_a?", "kind_of?", "equal?", "eql?", "==", "==="] + options[:except]
+      @only_methods = options[:only]
     end
 
     def class
-      @klass
+      @class
     end
 
     def method_missing(method_name, *args, &block)
-      comes_from_another = comes_from_another_method_missing?
-      begin
-        set_comes_from_another
-        result = @proxy_target.send(method_name, *args, &block)
-        return result if @methods_to_skip.include?(method_name.to_s) || comes_from_another
-        raise MissedStubException.new(@label || @proxy_target, method_name, args, result, Suggesters::RSpecSuggester)
-      ensure
-        clear_comes_from_another unless comes_from_another
-      end
-    end
-
-    private
-    def comes_from_another_method_missing?
-      Thread.current["stubborn_objects_ids"] = {} if Thread.current["stubborn_objects_ids"].nil?
-      Thread.current["stubborn_objects_ids"][self.__id__]
-    end
-
-    def set_comes_from_another
-      Thread.current["stubborn_objects_ids"][self.__id__] = true
-    end
-
-    def clear_comes_from_another
-      Thread.current["stubborn_objects_ids"].delete(self.__id__)
+      were_we_already_processing_a_missed_stub = Thread.current["inside_missed_stub"]
+      Thread.current["inside_missed_stub"] = true
+      result = @proxy_target.send(method_name, *args, &block)
+      return result if !@only_methods.include?(method_name.to_s) && !@only_methods.empty? || @methods_to_skip.include?(method_name.to_s) || were_we_already_processing_a_missed_stub
+      raise MissedStubException.new(@label || @proxy_target, method_name, args, result, Suggesters::RSpecSuggester)
+    ensure
+      Thread.current["inside_missed_stub"] = false unless were_we_already_processing_a_missed_stub
     end
   end
 

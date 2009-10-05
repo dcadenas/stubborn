@@ -4,7 +4,7 @@ module Test; end
 
 def reset_test_api_class
   name = "Api"
-  Test.__send__(:remove_const, name) if Test.const_defined?(name)
+  Test.send(:remove_const, name) if Test.const_defined?(name)
   klass =  Class.new do
     def plus_one(number)
       number + 1
@@ -84,11 +84,10 @@ Expectations do
     reset_test_api_class
     api = Test::Api.new
     api = Stubborn.should_be_stubbed(api)
-    message = ""
     begin
       api.plus_one(0)
     rescue => e 
-      message = e.message
+      e.message
     end
   end
 
@@ -96,11 +95,10 @@ Expectations do
     reset_test_api_class
     api = Test::Api.new
     api = Stubborn.should_be_stubbed(api, :label => "Api.singleton")
-    message = ""
     begin
       api.plus_one(0)
     rescue => e 
-      message = e.message
+      e.message
     end
   end
 
@@ -141,35 +139,32 @@ Expectations do
   expect "You've missed adding a stub. Consider this suggestions:\ntest_api_instance.stub!(:plus_one).with(0).and_return(1)\ntest_api_instance.stub!(:plus_one).and_return(1)" do
     reset_test_api_class
     Stubborn.should_be_stubbed(Test::Api)
-    message = ""
     api = Test::Api.new
     begin
       api.plus_one(0)
     rescue => e 
-      message = e.message
+      e.message
     end
   end
 
   expect "You've missed adding a stub. Consider this suggestions:\ntest_api_instance.stub!(:plus_three).with(1).and_return(4)\ntest_api_instance.stub!(:plus_three).and_return(4)" do
     reset_test_api_class
     Stubborn.should_be_stubbed(Test::Api)
-    message = ""
     api = Test::Api.new
     begin
       api.plus_three(1)
     rescue => e 
-      message = e.message
+      e.message
     end
   end
 
   expect "You've missed adding a stub. Consider this suggestions:\nTest::Api.stub!(:plus_four).with(1).and_return(5)\nTest::Api.stub!(:plus_four).and_return(5)" do
     reset_test_api_class
     Stubborn.should_be_stubbed(Test::Api)
-    message = ""
     begin
       Test::Api.plus_four(1)
     rescue => e 
-      message = e.message
+      e.message
     end
   end
 end
