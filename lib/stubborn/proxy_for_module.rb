@@ -1,5 +1,5 @@
 module Stubborn
-  class ProxyForClass < ProxyForInstance
+  class ProxyForModule < ProxyForInstance
     def initialize(proxy_target, options = {})
       super
       redefine_const(proxy_target, self) unless proxy_target.name.strip.empty?
