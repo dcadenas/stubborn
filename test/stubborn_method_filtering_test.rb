@@ -1,6 +1,8 @@
 require 'test_helper'
 
-module FilteringTest; end
+module FilteringTest
+  class Error < StandardError; end
+end
 
 def reset_filtering_test_api_class
   name = "Api"
@@ -12,6 +14,10 @@ def reset_filtering_test_api_class
 
     def instance_method_2
       "instance_method_2 called"
+    end
+
+    def instance_method_3
+      raise FilteringTest::Error
     end
 
     def self.class_method_1
@@ -114,5 +120,11 @@ Expectations do
     Stubborn.should_be_stubbed(FilteringTest::Api)
     api = FilteringTest::Api.new
     api.instance_method_1
+  end
+
+  expect Stubborn::MissedStubException do
+    reset_filtering_test_api_class
+    api = Stubborn.should_be_stubbed(FilteringTest::Api.new)
+    api.instance_method_3
   end
 end

@@ -26,7 +26,12 @@ module Stubborn
     def method_missing(method_name, *args, &block)
       were_we_already_processing_a_missed_stub = Thread.current["inside_missed_stub"]
       Thread.current["inside_missed_stub"] = true
-      result = @proxy_target.send(method_name, *args, &block)
+      result = begin
+                 @proxy_target.send(method_name, *args, &block)
+               rescue => e
+                 e
+               end
+
       return result if !@only_methods.include?(method_name.to_s) && !@only_methods.empty? || @methods_to_skip.include?(method_name.to_s) || were_we_already_processing_a_missed_stub
       raise_missed_stub_exception(method_name, args, result)
     ensure
