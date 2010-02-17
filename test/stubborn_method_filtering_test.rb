@@ -80,4 +80,39 @@ Expectations do
     Stubborn.should_be_stubbed(FilteringTest::Api, :only => :new)
     FilteringTest::Api.new
   end
+
+  expect Stubborn::MissedStubException do
+    reset_filtering_test_api_class
+    Stubborn.should_be_stubbed(FilteringTest::Api, :instance_methods => {:only => :instance_method_1})
+    api = FilteringTest::Api.new
+    api.instance_method_1
+  end
+
+  expect "instance_method_2 called" do
+    reset_filtering_test_api_class
+    Stubborn.should_be_stubbed(FilteringTest::Api, :instance_methods => {:only => :instance_method_1})
+    api = FilteringTest::Api.new
+    api.instance_method_2
+  end
+
+  expect Stubborn::MissedStubException do
+    reset_filtering_test_api_class
+    Stubborn.should_be_stubbed(FilteringTest::Api, :instance_methods => {:except => :instance_method_1})
+    api = FilteringTest::Api.new
+    api.instance_method_2
+  end
+
+  expect "instance_method_1 called" do
+    reset_filtering_test_api_class
+    Stubborn.should_be_stubbed(FilteringTest::Api, :instance_methods => {:except => :instance_method_1})
+    api = FilteringTest::Api.new
+    api.instance_method_1
+  end
+
+  expect Stubborn::MissedStubException do
+    reset_filtering_test_api_class
+    Stubborn.should_be_stubbed(FilteringTest::Api)
+    api = FilteringTest::Api.new
+    api.instance_method_1
+  end
 end

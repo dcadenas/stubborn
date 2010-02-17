@@ -63,9 +63,13 @@ You can control which methods to check with the options :except and :only. Both 
   Stubborn.should_be_stubbed(Api.new, :except => :safe_method)
   Stubborn.should_be_stubbed(Api.new, :only => [:slow_method, :external_service])
 
+You can also filter on instance methods. All you need to do is using the :instance_methods key to scope your :only or :except methods like this:
+
+  Stubborn.should_be_stubbed(User, :instance_methods => {:only => :save})
+
 == Installation
 
-  sudo gem install stubborn -s http://gemcutter.org
+  sudo gem install stubborn
 
 == To Do
 

@@ -12,7 +12,14 @@ module Stubborn
     def new(*args, &block)
       new_instance = @proxy_target.new(*args, &block)
       raise_missed_stub_exception("new", args, new_instance) if @only_methods.include?("new") && !@methods_to_skip.include?("new")
-      ProxyForInstance.new(new_instance, :class => self)
+      options = {:class => self}
+
+      if @instance_methods
+        options[:only] = @instance_methods[:only]
+        options[:except] = @instance_methods[:except]
+      end
+
+      ProxyForInstance.new(new_instance, options)
     end
 
   private

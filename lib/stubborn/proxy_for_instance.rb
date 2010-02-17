@@ -16,6 +16,7 @@ module Stubborn
       @class = options[:class]
       @methods_to_skip = ["respond_to?", "is_a?", "kind_of?", "equal?", "eql?", "==", "==="] + options[:except]
       @only_methods = options[:only]
+      @instance_methods = options[:instance_methods]
     end
 
     def class
