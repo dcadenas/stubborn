@@ -36,9 +36,14 @@ module Stubborn
       Thread.current["inside_missed_stub"] = true
       result = @proxy_target.send(method_name, *args, &block)
       return result if !@only_methods.include?(method_name.to_s) && !@only_methods.empty? || @methods_to_skip.include?(method_name.to_s) || were_we_already_processing_a_missed_stub
-      raise MissedStubException.new(@label || @proxy_target, method_name, args, result, Suggesters::RSpecSuggester)
+      raise_missed_stub_exception(method_name, args, result)
     ensure
       Thread.current["inside_missed_stub"] = false unless were_we_already_processing_a_missed_stub
+    end
+
+    private
+    def raise_missed_stub_exception(method_name, args, result)
+      raise MissedStubException.new(@label || @proxy_target, method_name, args, result, Suggesters::RSpecSuggester)
     end
   end
 
@@ -54,6 +59,7 @@ module Stubborn
 
     def new(*args, &block)
       new_instance = @proxy_target.new(*args, &block)
+      raise_missed_stub_exception("new", args, new_instance) if @only_methods.include?("new") && !@methods_to_skip.include?("new")
       ProxyForInstance.new(new_instance, :class => self)
     end
 
