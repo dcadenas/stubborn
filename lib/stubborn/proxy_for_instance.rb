@@ -9,8 +9,8 @@ module Stubborn
     def initialize(proxy_target, options = {})
       @proxy_target = proxy_target
 
-      options[:except] = [options[:except]].flatten.compact.map{|m| m.to_s}
-      options[:only] = [options[:only]].flatten.compact.map{|m| m.to_s}
+      options[:except] = normalize_options(options[:except])
+      options[:only] = normalize_options(options[:only])
       options = {:class => proxy_target.class}.merge(options)
       @label = options[:label]
       @class = options[:class]
@@ -28,8 +28,8 @@ module Stubborn
       Thread.current["inside_missed_stub"] = true
       result = begin
                  @proxy_target.send(method_name, *args, &block)
-               rescue => e
-                 e
+               rescue => exception
+                 exception
                end
 
       return result if !@only_methods.include?(method_name.to_s) && !@only_methods.empty? || @methods_to_skip.include?(method_name.to_s) || were_we_already_processing_a_missed_stub
@@ -38,9 +38,13 @@ module Stubborn
       Thread.current["inside_missed_stub"] = false unless were_we_already_processing_a_missed_stub
     end
 
-    private
+  private
     def raise_missed_stub_exception(method_name, args, result)
       raise MissedStubException.new(@label || @proxy_target, method_name, args, result, Stubborn.suggester)
+    end
+
+    def normalize_options(options)
+      [options].flatten.compact.map{|method_name| method_name.to_s}
     end
   end
 end

@@ -3,18 +3,11 @@ module Stubborn
     module RSpecSuggester
       def self.suggestions(object_or_label, method_name, args, result_object)
         object_label = object_or_label.respond_to?(:to_str) ? object_or_label : friendly_name(object_or_label)
-        args = args.map{|a| friendly_name(a)}.join(", ")
-        result = friendly_name(result_object)
+        args = args.map{|arg| friendly_name(arg)}.join(", ")
 
         with = args.strip.empty? ? nil : ".with(#{args})"
 
-        return_method = if result_object.is_a?(Exception)
-                          ".and_raise(#{result_object.class})"
-                        elsif result_object.nil?
-                          nil
-                        else
-                          ".and_return(#{result})"
-                        end
+        return_method = get_return_method(result_object)
 
         suggestions = []
         suggestions << "#{object_label}.stub!(:#{method_name})#{with}#{return_method}"
@@ -23,6 +16,17 @@ module Stubborn
       end
 
     private
+      def self.get_return_method(result_object)
+        result = friendly_name(result_object)
+        if result_object.is_a?(Exception)
+          ".and_raise(#{result_object.class})"
+        elsif result_object.nil?
+          nil
+        else
+          ".and_return(#{result})"
+        end
+      end
+
       def self.friendly_name(object)
         return "\"#{object}\"" if object.respond_to?(:to_str)
         return object.inspect if object.respond_to?(:to_int) || object.is_a?(Hash) || object.nil? || object == true || object == false

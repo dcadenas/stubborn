@@ -22,11 +22,10 @@ module Stubborn
       ProxyForInstance.new(new_instance, options)
     end
 
-  private
     def redefine_const(const, value)
       const_parts = const.name.split('::')
       const_name = const_parts.pop
-      parent_const = const_parts.inject(Object){|a, c| a.const_get(c) }
+      parent_const = const_parts.inject(Object){|constant_chain, constant| constant_chain.const_get(constant) }
 
       parent_const.__send__(:remove_const, const_name) if parent_const.const_defined?(const_name)
       parent_const.const_set(const_name, value)
