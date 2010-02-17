@@ -1,5 +1,6 @@
-require 'suggesters/rspec_suggester'
-require 'missed_stub_exception'
+require 'stubborn/suggesters/rspec_suggester'
+require 'stubborn/proxy_for_instance'
+require 'stubborn/proxy_for_class'
 
 module Stubborn
   def self.should_be_stubbed(object, options = {})
@@ -10,67 +11,11 @@ module Stubborn
     end
   end
 
-  class ProxyForInstance
-    instance_methods.each do |sym|
-      undef_method(sym) unless sym.to_s =~ /__/ || sym.to_s == "send"
-    end
-
-    def initialize(proxy_target, options = {})
-      @proxy_target = proxy_target
-
-      options[:except] = [options[:except]].flatten.compact.map{|m| m.to_s}
-      options[:only] = [options[:only]].flatten.compact.map{|m| m.to_s}
-      options = {:class => proxy_target.class}.merge(options)
-      @label = options[:label]
-      @class = options[:class]
-      @methods_to_skip = ["respond_to?", "is_a?", "kind_of?", "equal?", "eql?", "==", "==="] + options[:except]
-      @only_methods = options[:only]
-    end
-
-    def class
-      @class
-    end
-
-    def method_missing(method_name, *args, &block)
-      were_we_already_processing_a_missed_stub = Thread.current["inside_missed_stub"]
-      Thread.current["inside_missed_stub"] = true
-      result = @proxy_target.send(method_name, *args, &block)
-      return result if !@only_methods.include?(method_name.to_s) && !@only_methods.empty? || @methods_to_skip.include?(method_name.to_s) || were_we_already_processing_a_missed_stub
-      raise_missed_stub_exception(method_name, args, result)
-    ensure
-      Thread.current["inside_missed_stub"] = false unless were_we_already_processing_a_missed_stub
-    end
-
-    private
-    def raise_missed_stub_exception(method_name, args, result)
-      raise MissedStubException.new(@label || @proxy_target, method_name, args, result, Suggesters::RSpecSuggester)
-    end
+  def self.suggester=(suggester)
+    @suggester = suggester
   end
 
-  class ProxyForClass < ProxyForInstance
-    def initialize(proxy_target, options = {})
-      super
-      redefine_const(proxy_target, self) unless proxy_target.name.strip.empty?
-    end
-
-    def name
-      @proxy_target.name
-    end
-
-    def new(*args, &block)
-      new_instance = @proxy_target.new(*args, &block)
-      raise_missed_stub_exception("new", args, new_instance) if @only_methods.include?("new") && !@methods_to_skip.include?("new")
-      ProxyForInstance.new(new_instance, :class => self)
-    end
-
-  private
-    def redefine_const(const, value)
-      const_parts = const.name.split('::')
-      const_name = const_parts.pop
-      parent_const = const_parts.inject(Object){|a, c| a.const_get(c) }
-
-      parent_const.__send__(:remove_const, const_name) if parent_const.const_defined?(const_name)
-      parent_const.const_set(const_name, value)
-    end
+  def self.suggester
+    @suggester ||= Suggesters::RSpecSuggester
   end
 end
